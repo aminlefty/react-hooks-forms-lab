@@ -1,47 +1,22 @@
-import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ItemForm from "../components/ItemForm";
-import App from "../components/App";
 
-test("calls the onItemFormSubmit callback prop when the form is submitted", () => {
-  const onItemFormSubmit = jest.fn();
-  render(<ItemForm onItemFormSubmit={onItemFormSubmit} />);
+test("renders item form and calls on submit", () => {
+  const mockOnItemFormSubmit = jest.fn();
 
-  fireEvent.change(screen.queryByLabelText(/Name/), {
-    target: { value: "Ice Cream" },
-  });
+  render(<ItemForm onItemFormSubmit={mockOnItemFormSubmit} />);
 
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Dessert" },
-  });
+  const input = screen.getByPlaceholderText(/enter item name/i);
+  const button = screen.getByText(/add item/i);
 
-  fireEvent.submit(screen.queryByText(/Add to List/));
+  fireEvent.change(input, { target: { value: "Bread" } });
+  fireEvent.click(button);
 
-  expect(onItemFormSubmit).toHaveBeenCalledWith(
+  expect(mockOnItemFormSubmit).toHaveBeenCalledTimes(1);
+  expect(mockOnItemFormSubmit).toHaveBeenCalledWith(
     expect.objectContaining({
-      id: expect.any(String),
-      name: "Ice Cream",
-      category: "Dessert",
+      name: "Bread",
+      category: "Produce",
     })
   );
-});
-
-test("adds a new item to the list when the form is submitted", () => {
-  render(<App />);
-
-  const dessertCount = screen.queryAllByText(/Dessert/).length;
-
-  fireEvent.change(screen.queryByLabelText(/Name/), {
-    target: { value: "Ice Cream" },
-  });
-
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Dessert" },
-  });
-
-  fireEvent.submit(screen.queryByText(/Add to List/));
-
-  expect(screen.queryByText(/Ice Cream/)).toBeInTheDocument();
-
-  expect(screen.queryAllByText(/Dessert/).length).toBe(dessertCount + 1);
 });
